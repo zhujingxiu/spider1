@@ -194,31 +194,36 @@ class Douban(object):
                 browser.add_cookie(item)
         browser.get(url)
         movie = {
-            'title': browser.find_element_by_xpath('//*[@id="content"]/h1/span[1]').text,
-            'year': browser.find_element_by_xpath('//*[@id="content"]/h1/span[2]').text,
-            'cover': browser.find_element_by_xpath('//*[@id="mainpic"]/a/img').get_attribute('src'),
-            'director': browser.find_element_by_xpath('//*[@id="info"]/span[1]/span[2]/a').text,
-            'scriptwriter': browser.find_element_by_xpath('//*[@id="info"]/span[2]/span[2]').text,
-            'actor': browser.find_element_by_xpath('//*[@id="info"]/span[@class="actor"]/span[2]').text,
-            'releasedate': browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:initialReleaseDate"]').text,
-            'runtime': browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:genre"]').text,
-            'score': browser.find_element_by_xpath('//*[@id="interest_sectl"]/div[1]/div[2]/strong').text,
+            # 'title': browser.find_element_by_xpath('//*[@id="content"]/h1/span[1]').text,
+            # 'year': browser.find_element_by_xpath('//*[@id="content"]/h1/span[2]').text,
+            # 'cover': browser.find_element_by_xpath('//*[@id="mainpic"]/a/img').get_attribute('src'),
+            # 'director': browser.find_element_by_xpath('//*[@id="info"]/span[1]/span[2]/a').text,
+            # 'scriptwriter': browser.find_element_by_xpath('//*[@id="info"]/span[2]/span[2]').text,
+            # 'actor': browser.find_element_by_xpath('//*[@id="info"]/span[@class="actor"]/span[2]').text,
+            # 'releasedate': browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:initialReleaseDate"]').text,
+            # 'runtime': browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:genre"]').text,
+            # 'score': browser.find_element_by_xpath('//*[@id="interest_sectl"]/div[1]/div[2]/strong').text,
         }
         movie_types = []
         genre_eles = browser.find_elements_by_xpath('//*[@id="info"]/span[@property="v:genre"]')
         for ele_type in genre_eles:
             movie_types.append(ele_type.text)
         movie['type'] = ' '.join(movie_types)
+        selector = ''
         pl_eles = browser.find_elements_by_css_selector('#info span[class=pl]')
-        for ele in pl_eles:
+        for i, ele in enumerate(pl_eles, 1):
             ele_text = ele.text
-            print(ele_text, ele_text.find("语言:"))
+            print(ele_text, ele_text.find("语言:"), i)
             if ele_text.find("语言:") != -1:
-                language = ele.find_element_by_xpath('.//text()[1]')[0]
-                print(language)
+                print('parent:%s | location:%s' % (ele.parent, ele.location))
+                selector = '#info span[class=pl][%d] + *[1]' % i
+                print(selector)
+
                 # language = ele.find_element_by_xpath('.//text()[1]').text
                 # print(language)
                 break
+        language = browser.find_element_by_css_selector(selector)[0]
+        print(language)
         browser.quit()
         return movie
 

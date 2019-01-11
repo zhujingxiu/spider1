@@ -3,7 +3,6 @@
 # _AUTHOR_  : zhujingxiu
 # _DATE_    : 2019/1/8
 import json
-import time
 import random
 import requests
 from lxml import etree
@@ -209,20 +208,18 @@ class Douban(object):
         for ele_type in genre_eles:
             movie_types.append(ele_type.text)
         movie['type'] = ' '.join(movie_types)
-        selector = ''
+        xpath_selector = ''
         pl_eles = browser.find_elements_by_css_selector('#info span[class=pl]')
         for i, ele in enumerate(pl_eles, 1):
             ele_text = ele.text
             print(ele_text, ele_text.find("语言:"), i)
             if ele_text.find("语言:") != -1:
                 print('parent:%s | location:%s' % (ele.parent, ele.location))
-                selector = '#info span[class=pl][%d] + *[1]' % i
-                print(selector)
+                xpath_selector = '//*[@id="info"]/span[@class="pl"][%d]/following-sibling::*/text()' % i
+                print(xpath_selector)
 
-                # language = ele.find_element_by_xpath('.//text()[1]').text
-                # print(language)
                 break
-        language = browser.find_element_by_css_selector(selector)[0]
+        language = browser.find_element_by_xpath(xpath_selector)[0]
         print(language)
         browser.quit()
         return movie

@@ -4,10 +4,12 @@
 # _DATE_    : 2019/1/8
 import json
 import random
+import datetime
 import requests
 from lxml import etree
 from bs4 import BeautifulSoup as bs
 import settings
+import utils
 
 
 class Douban(object):
@@ -25,7 +27,7 @@ class Douban(object):
     @property
     def login_data(self):
         data = {'source': 'index_nav', 'redir': 'https://www.douban.com', 'form_email': self.user,
-            'form_password': self.pwd, 'login': '登录'}
+                'form_password': self.pwd, 'login': '登录'}
         if self.captcha_solution:
             data['captcha-solution'] = self.captcha_solution
 
@@ -50,14 +52,12 @@ class Douban(object):
         response = self.request.post(url=self.login_url, data=self.login_data, headers=self.headers,
                                      proxies=self.proxies)
         content = response.text
-
         bsoup = bs(content, 'lxml')
         captcha = bsoup.find('img', id='captcha_image')
-
         if captcha:
             response = self.captcha_login(captcha, bsoup)
         if response:
-            print('1.账户已登录')
+            print('\033[0;34;40m', '1.账户已登录', '\033[0m')
         return response
 
     def captcha_login(self, captcha, bsoup):
@@ -71,11 +71,11 @@ class Douban(object):
         url_captcha = captcha.get('src')
         input_captcha_id = bsoup.find('input', attrs={'name': 'captcha-id'})
         captcha_id = input_captcha_id.get('value')
-        print("图片验证码地址: ", url_captcha)
+        print('\033[0;34;40m', "图片验证码地址: %s " % url_captcha, '\033[0m')
         browser = webdriver.Chrome()
         browser.set_window_size(400, 300)
         browser.get(url_captcha)
-        captcha_text = input('请输入上面图片中的验证码>>:')
+        captcha_text = input('\033[0;31;40m请输入上面图片中的验证码>>:\033[0m')
         self.captcha_solution = captcha_text
         self.captcha_id = captcha_id
         browser.quit()
@@ -96,19 +96,22 @@ class Douban(object):
         :return:
         '''
         response = self.request.get(url=self.movies_url)
+        # 更新影片分类到本地文件
         if response:
             content = response.text
-
             types_dict = []
             tree = etree.HTML(content)
-            movies_types = tree.xpath('//*[@id="content"]/div/div[2]/div[1]/div/span')
-            for span in movies_types:
-                a_url = span.xpath('./a/@href')[0]
-                a_text = span.xpath('./a/text()')[0]
-                types_dict.append({'text': a_text.strip(), 'url': a_url.split('?')[1].strip(), })
+            try:
+                movies_types = tree.xpath('//*[@id="content"]/div/div[2]/div[1]/div/span')
+                for span in movies_types:
+                    a_url = span.xpath('./a/@href')[0]
+                    a_text = span.xpath('./a/text()')[0]
+                    types_dict.append({'text': a_text.strip(), 'url': a_url.split('?')[1].strip(), })
+            except:
+                pass
             self.save_file('movies_types.json', json.dumps(types_dict).encode())
-        if response:
-            print('2.访问分类排行榜页面')
+
+            print('\033[0;34;40m', '2.访问分类排行榜页面', '\033[0m')
 
         return response
 
@@ -120,24 +123,12 @@ class Douban(object):
                 data.append({'name': item, 'value': _cookie_dict[item]})
         return data
 
-    def movies_rank_type(self, save=False):
+    def get_webdriver(self, url):
         '''
-        指定分类排行榜
+        使用chrome--headless模式，并同步cookie
+        :param url:
         :return:
         '''
-
-        movies_types = json.load(open('./data/movies_types.json', 'r', encoding='utf-8'))
-        if movies_types:
-            for i, item in enumerate(movies_types):
-                print("%d.%s" % (i, item.get('text')))
-        type_index = int(input("请输入指定的数字类型(默认为0)>>:").strip())
-        movies_type = movies_types[type_index]
-        if not movies_types:
-            movies_type = movies_types[0]
-        type_name = movies_type.get('text')
-        url = "%s?%s" % (self.type_url, movies_type.get('url'))
-        print("3.访问电影类型：%s -> %s" % (type_name, url))
-
         from selenium import webdriver
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
@@ -150,24 +141,48 @@ class Douban(object):
             for item in cookies:
                 browser.add_cookie(item)
         browser.get(url)
+        return browser
+
+    @utils.calcu_time
+    def movies_rank_type(self, save=False):
+        '''
+        指定分类排行榜
+        :return:
+        '''
+        movies_types = json.load(open('./data/movies_types.json', 'r', encoding='utf-8'))
+        if movies_types:
+            for i, item in enumerate(movies_types):
+                print("%d.%s" % (i, item.get('text')))
+        type_index = int(input("\033[0;31;40m请输入指定的数字类型(默认为0)>>:\033[0m").strip())
+        movies_type = movies_types[type_index]
+        if not movies_types:
+            movies_type = movies_types[0]
+        type_name = movies_type.get('text')
+        url = "%s?%s" % (self.type_url, movies_type.get('url'))
+        print('\033[0;34;40m', "3.访问电影类型：%s -> %s ：" % (type_name, url), '\033[0m')
+
+        browser = self.get_webdriver(url)
         browser.execute_script('window.scrollTo(0,2000)')
+        # 本地保存下
         content = browser.page_source
         self.save_file("%s.html" % type_name, content.encode('utf-8'))
-        movie_items = browser.find_elements_by_xpath('//*[@id="content"]/div/div[1]/div[6]/div')
-        movies_list =[]
-        for movie in movie_items:
-            title = movie.find_element_by_xpath('./div/div/div/span/a').text
-            url = movie.find_element_by_xpath('./div/a').get_attribute('href')
-            movies_list.append({
-                'title': title,
-                'url': url,
-            })
-        print(movies_list)
+        movies_list = []
+        # 解析html
+        try:
+            movie_items = browser.find_elements_by_xpath('//*[@id="content"]/div/div[1]/div[6]/div')
+            for i, movie in enumerate(movie_items, 1):
+                title = movie.find_element_by_xpath('./div/div/div/span/a').text
+                url = movie.find_element_by_xpath('./div/a').get_attribute('href')
+                item = {'title': title, 'url': url, }
+                movies_list.append(item)
+                print("%d. %s %s" % (i, title, url))
+        except:
+            pass
         if save:
             self.save_movies(movies_list)
         return movies_list
 
-    def save_movies(self, movies_list):
+    def save_movies(self, movies_list, filename=None):
         if not movies_list:
             return False
         movies = []
@@ -177,50 +192,67 @@ class Douban(object):
             movie = self.movie_detail(item.get('url'))
             print(movie)
             movies.append(movie)
-        return self.save_file('movies.json', json.dumps(movies).encode())
+        if not filename:
+            filename = 'movies-%s.json' % datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        return self.save_file(filename, json.dumps(movies).encode())
 
+    @utils.calcu_time
     def movie_detail(self, url):
-        print("访问电影详情页面>> ", url)
-        from selenium import webdriver
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        browser = webdriver.Chrome(chrome_options=options)
+        browser = self.get_webdriver(url)
         browser.get(url)
-        # 使用requests的cookie
-        if self.get_cookies():
-            cookies = self.get_cookies()
-            for item in cookies:
-                browser.add_cookie(item)
-        browser.get(url)
-        movie = {
-            # 'title': browser.find_element_by_xpath('//*[@id="content"]/h1/span[1]').text,
-            # 'year': browser.find_element_by_xpath('//*[@id="content"]/h1/span[2]').text,
-            # 'cover': browser.find_element_by_xpath('//*[@id="mainpic"]/a/img').get_attribute('src'),
-            # 'director': browser.find_element_by_xpath('//*[@id="info"]/span[1]/span[2]/a').text,
-            # 'scriptwriter': browser.find_element_by_xpath('//*[@id="info"]/span[2]/span[2]').text,
-            # 'actor': browser.find_element_by_xpath('//*[@id="info"]/span[@class="actor"]/span[2]').text,
-            # 'releasedate': browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:initialReleaseDate"]').text,
-            # 'runtime': browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:genre"]').text,
-            # 'score': browser.find_element_by_xpath('//*[@id="interest_sectl"]/div[1]/div[2]/strong').text,
-        }
-        movie_types = []
-        genre_eles = browser.find_elements_by_xpath('//*[@id="info"]/span[@property="v:genre"]')
-        for ele_type in genre_eles:
-            movie_types.append(ele_type.text)
-        movie['type'] = ' '.join(movie_types)
-        xpath_selector = ''
-        pl_eles = browser.find_elements_by_css_selector('#info span[class=pl]')
-        for i, ele in enumerate(pl_eles, 1):
-            ele_text = ele.text
-            print(ele_text, ele_text.find("语言:"), i)
-            if ele_text.find("语言:") != -1:
-                print('parent:%s | location:%s' % (ele.parent, ele.location))
-                xpath_selector = '//*[@id="info"]/span[@class="pl"][%d]/following-sibling::*/text()' % i
-                print(xpath_selector)
+        movie = {'title': '', 'year': '', 'cover': '', 'director': '', 'scriptwriter': '', 'actor': '',
+            'releasedate': '', 'runtime': '', 'score': '', 'type': '', 'language': '', }
+        try:
+            # 电影名称
+            title_ele = browser.find_element_by_xpath('//*[@id="content"]/h1/span[1]')
+            if title_ele:
+                movie['title'] = title_ele.text
+            year_ele = browser.find_element_by_xpath('//*[@id="content"]/h1/span[2]')
+            if year_ele:
+                movie['year'] = year_ele.text
 
-                break
-        language = browser.find_element_by_xpath(xpath_selector)[0]
-        print(language)
+            # 电影封面
+            cover_ele = browser.find_element_by_xpath('//*[@id="mainpic"]/a/img')
+            if cover_ele:
+                movie['cover'] = cover_ele.get_attribute('src')
+
+            # 电影导演
+            director_ele = browser.find_element_by_xpath('//*[@id="info"]/span[1]/span[2]/a')
+            if director_ele:
+                movie['director'] = director_ele.text
+            # 电影编剧
+            scriptwriter_ele = browser.find_element_by_xpath('//*[@id="info"]/span[2]/span[2]')
+            if scriptwriter_ele:
+                movie['scriptwriter'] = scriptwriter_ele.text
+            # 电影演员
+            actor_ele = browser.find_element_by_xpath('//*[@id="info"]/span[@class="actor"]/span[2]')
+            if actor_ele:
+                movie['actor'] = actor_ele.text
+            # 电影上映日期
+            release_ele = browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:initialReleaseDate"]')
+            if release_ele:
+                movie['releasedate'] = release_ele.text
+            # 电影片长
+            runtime_ele = browser.find_element_by_xpath('//*[@id="info"]/span[@property="v:runtime"]')
+            if runtime_ele:
+                movie['runtime'] = runtime_ele.text
+            # 电影评分
+            score_ele = browser.find_element_by_css_selector('#interest_sectl strong')
+            if score_ele:
+                movie['score'] = score_ele.text
+            # 电影类型
+            movie_types = []
+            genre_eles = browser.find_elements_by_xpath('//*[@id="info"]/span[@property="v:genre"]')
+            for ele_type in genre_eles:
+                movie_types.append(ele_type.text)
+            movie['type'] = ' '.join(movie_types)
+            # 电影语言
+            language_ele = browser.find_element_by_xpath('//*[@id="info"]/span[@class="pl" and contains(text(),"语言:")]')
+            if language_ele:
+                movie['language'] = browser.execute_script('return arguments[0].nextSibling.textContent', language_ele)
+        except:
+            pass
+
         browser.quit()
         return movie
 
@@ -229,6 +261,3 @@ class Douban(object):
         with open(filename, 'wb') as f:
             f.write(content)
         return filename
-
-    def test(self):
-        pass

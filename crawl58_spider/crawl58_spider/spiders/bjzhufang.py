@@ -17,7 +17,7 @@ class BjzhufangSpider(CrawlSpider):
     start_urls = ['https://bj.58.com/chuzu/']
     # redis_key = 'bjzhufang'
     # 链接提取器
-    link = LinkExtractor(allow=r'pn\d+/')
+    link = LinkExtractor(allow=r'pn(\d+)?/')
     rules = (
         # 规则解析器
         # callback： 指定解析回调
@@ -34,21 +34,26 @@ class BjzhufangSpider(CrawlSpider):
         li_list = response.xpath('//div[@class="mainbox"]/div/div[@class="content"]/div[@class="listBox"]/ul/li')
         print(response.url, len(li_list))
         for i, li_item in enumerate(li_list, 1):
+            renting_info = Crawl58SpiderItem()
             image = li_item.xpath('./div[@class="img_list"]/a/img/@src').extract_first().strip()
             title = li_item.xpath('./div[@class="des"]/h2/a/text()').extract_first().strip()
             building = li_item.xpath('./div[@class="des"]/p[@class="room"]/text()').extract_first().strip()
-            addr = li_item.xpath('./div[@class="des"]/p[@class="add"]/text()').extract_first().strip()
+            address = li_item.xpath('./div[@class="des"]/p[@class="add"]/text()').extract_first().strip()
             source = li_item.xpath('./div[@class="des"]/div[@class="jjr"]/span[@class="jjr_par"]/text()').extract_first().strip()
             money = li_item.xpath('./div[3]/div[2]/b/text()').extract_first().strip()
             info = {
                 'img': image,
                 'title': self.parse_crypt_text(title),
                 'building': self.parse_crypt_text(building),
-                'addr': self.parse_crypt_text(addr),
+                'addr': self.parse_crypt_text(address),
                 'source': source,
                 'money': self.parse_crypt_text(money),
             }
-
+            renting_info['title'] = self.parse_crypt_text(title)
+            renting_info['building'] = self.parse_crypt_text(building)
+            renting_info['address'] = self.parse_crypt_text(address)
+            renting_info['source'] = self.parse_crypt_text(source)
+            renting_info['money'] = self.parse_crypt_text(money)
             print(i, info)
         return page_info
 

@@ -11,4 +11,9 @@ import scrapy
 class Crawl58SpiderItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    title = scrapy.Field()
+    image = scrapy.Field()
+    building = scrapy.Field()
+    address = scrapy.Field()
+    source = scrapy.Field()
+    money = scrapy.Field()

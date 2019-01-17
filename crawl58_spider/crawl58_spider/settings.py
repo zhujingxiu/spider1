@@ -65,9 +65,9 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'crawl58_spider.pipelines.Crawl58SpiderPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'crawl58_spider.pipelines.Crawl58SpiderPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

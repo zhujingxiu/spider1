@@ -63,12 +63,19 @@ class BjzhufangSpider(CrawlSpider):
     def parse_detail(self, response):
         renting_info = Crawl58SpiderItem()
         renting_info['crypt'] = ''
-        script_text = response.xpath('//head/script[1]/text()').extract_first()
-        if script_text:
-            renting_info['crypt'] = re.findall("src:url\('.*charset=utf-8;base64,(.*)'\) format", script_text)[0]
-        renting_info['title'] = response.xpath('//div[@class="main-wrap"]/div[1]/h1/text()').extract_first().strip()
-        renting_info['price'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[1]/b/text()').extract_first().strip()
+        try:
+            script_text = response.xpath('//head/script[1]/text()').extract_first()
+            if script_text:
+                renting_info['crypt'] = re.findall("src:url\('.*charset=utf-8;base64,(.*)'\) format", script_text)[0]
+            renting_info['cover'] = response.xpath('//img[@id="smainPic"]/@src').extract_first().strip()
+            renting_info['title'] = response.xpath('//div[@class="main-wrap"]/div[1]/h1/text()').extract_first().strip()
+            renting_info['price'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[1]/b/text()').extract_first().strip()
+            renting_info['payment'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[2]/text()').extract_first().strip()
+            renting_info['horse_type'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[1]/span[2]/text()').extract_first().strip()
+            renting_info['house'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[2]/span[2]/text()').extract_first().strip()
 
+        except Exception as e:
+            print(e)
         yield renting_info
 
     def make_font(self, script_text):

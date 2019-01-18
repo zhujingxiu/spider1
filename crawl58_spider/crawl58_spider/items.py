@@ -24,3 +24,4 @@ class Crawl58SpiderItem(scrapy.Item):
     position = scrapy.Field()
     source = scrapy.Field()
     images = scrapy.Field()
+    proxy = scrapy.Field()

@@ -19,15 +19,10 @@ class Crawl58SpiderPipeline(object):
         self.conn = pymysql.connect(host='localhost', user='root', password='123456', database='pyspider', charset='utf8')
         self.cur = self.conn.cursor()
 
-    def crypt_json(self):
-        crypt_list = json.load(open('./data/crypt.json', 'r', encoding='utf-8'))
-        print(crypt_list)
-        if crypt_list:
-            for i in crypt_list:
-                pass
-
     def process_item(self, item, spider):
         try:
+            proxy = item.get('proxy')
+            print(proxy)
             script_text = item.get('crypt')
             self.make_font(script_text)
             cover = item.get('cover')
@@ -63,6 +58,7 @@ class Crawl58SpiderPipeline(object):
                 'source': source,
                 'info': info,
                 'images': json.dumps(images),
+                'proxy': proxy,
                 'addtime': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
 

@@ -16,39 +16,13 @@ class BjzhufangSpider(CrawlSpider):
     start_urls = ['https://bj.58.com/chuzu/']
     # redis_key = 'bjzhufang'
     # 链接提取器
-    link = LinkExtractor(allow=r'pn(\d+)?/')
+    link = LinkExtractor(allow=r'pn(\d+)?/?')
     rules = (
         # 规则解析器
         # callback： 指定解析回调
         # follow: 是否将链接提取器继续作用在提取出的链接页面中
         Rule(link, callback='parse_item', follow=True),
     )
-
-    # def parse_list(self, response):
-    #
-    #     renting_info = Crawl58SpiderItem()
-    #     image = li_item.xpath('./div[@class="img_list"]/a/img/@src').extract_first().strip()
-    #     print('image',image)
-    #     title = li_item.xpath('./div[@class="des"]/h2/a/text()').extract_first().strip()
-    #     print('title',title)
-    #     building = li_item.xpath('./div[@class="des"]/p[1]/text()').extract_first().strip()
-    #     print('building:',building)
-    #     address = li_item.xpath('./div[@class="des"]/p[2]/a[1]/text()').extract_first().strip()
-    #     print('address:',address)
-    #
-    #     money = li_item.xpath('./div[3]/div[2]/b/text()').extract_first().strip()
-    #     print('money',money)
-    #     info = {
-    #         'img': image,
-    #         'title': self.parse_crypt_text(title),
-    #         'building': self.parse_crypt_text(building),
-    #         'addr': self.parse_crypt_text(address),
-    #         'money': self.parse_crypt_text(money),
-    #     }
-    #     renting_info['title'] = self.parse_crypt_text(title)
-    #     renting_info['building'] = self.parse_crypt_text(building)
-    #     renting_info['address'] = self.parse_crypt_text(address)
-    #     renting_info['money'] = self.parse_crypt_text(money)
 
     def parse_item(self, response):
         li_list = response.xpath('//div[@class="mainbox"]/div/div[@class="content"]/div[@class="listBox"]/ul/li')
@@ -61,6 +35,7 @@ class BjzhufangSpider(CrawlSpider):
 
     def parse_detail(self, response):
         renting_info = Crawl58SpiderItem()
+        renting_info['proxy'] = response.meta['proxy']
         renting_info['crypt'] = ''
         try:
             script_text = response.xpath('//head/script[1]/text()').extract_first()
@@ -88,15 +63,6 @@ class BjzhufangSpider(CrawlSpider):
             renting_info['source'] = source.strip() if source else ''
             info = response.css('ul.introduce-item li:nth-child(2) span:nth-child(2)::text').extract_first()
             renting_info['info'] = info.strip() if info else ''
-            # renting_info['cover'] = response.xpath('//img[@id="smainPic"]/@src').extract_first()
-            # renting_info['title'] = response.xpath('//div[@class="main-wrap"]/div[1]/h1/text()').extract_first()
-            # renting_info['price'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[1]/b/text()').extract_first()
-            # renting_info['payment'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[2]/text()').extract_first()
-            # renting_info['mode'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[1]/span[2]/text()').extract_first()
-            # renting_info['house'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[2]/span[2]/text()').extract_first()
-            # renting_info['phone'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[2]/div[1]/span/text()').extract_first()
-            # renting_info['address'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[6]/span[2]/text()').extract_first()
-            # renting_info['info'] = response.xpath('//div[@class="main-wrap"]/div[3]/div[1]/div[2]/ul/li[2]/span[2]/text()').extract_first()
             house_image = []
             image_eles = response.css('#housePicList li')
             if not image_eles:

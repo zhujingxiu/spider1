@@ -6,8 +6,7 @@ from scrapy_redis.spiders import RedisCrawlSpider
 from crawl58_spider.items import Crawl58SpiderItem
 import base64
 import re
-from fontTools.ttLib import TTFont
-from io import BytesIO
+import traceback
 
 
 class BjzhufangSpider(CrawlSpider):
@@ -67,34 +66,48 @@ class BjzhufangSpider(CrawlSpider):
             script_text = response.xpath('//head/script[1]/text()').extract_first()
             if script_text:
                 renting_info['crypt'] = re.findall("src:url\('.*charset=utf-8;base64,(.*)'\) format", script_text)[0]
-            renting_info['cover'] = response.xpath('//img[@id="smainPic"]/@src').extract_first().strip()
-            renting_info['title'] = response.xpath('//div[@class="main-wrap"]/div[1]/h1/text()').extract_first().strip()
-            renting_info['price'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[1]/b/text()').extract_first().strip()
-            renting_info['payment'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[2]/text()').extract_first().strip()
-            renting_info['horse_type'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[1]/span[2]/text()').extract_first().strip()
-            renting_info['house'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[2]/span[2]/text()').extract_first().strip()
+            cover = response.css('#smainPic::attr(src)').extract_first()
+            renting_info['cover'] = cover.strip() if cover else ''
+            title = response.css('div.house-title h1::text').extract_first()
+            renting_info['title'] = title.strip() if title else ''
+            price = response.css('div.house-pay-way span:nth-child(1) b::text').extract_first()
+            renting_info['price'] = price.strip() if price else ''
+            payment = response.css('div.house-pay-way span:nth-child(2)::text').extract_first()
+            renting_info['payment'] = payment.strip() if payment else ''
+            mode = response.css('div.house-desc-item ul li:nth-child(1) span:nth-child(2)::text').extract_first()
+            renting_info['mode'] = mode.strip() if mode else ''
+            house = response.css('div.house-desc-item ul li:nth-child(2) span:nth-child(2)::text').extract_first()
+            renting_info['house'] = house.strip() if house else ''
+            position = response.css('div.house-desc-item ul li:nth-child(3) span:nth-child(2)::text').extract_first()
+            renting_info['position'] = position.strip() if position else ''
+            address = response.css('span.dz::text').extract_first()
+            renting_info['address'] = address.strip() if address else ''
+            phone = response.css('span.house-chat-txt::text').extract_first()
+            renting_info['phone'] = phone.strip() if phone else ''
+            source = response.css('p.agent-subgroup::text').extract_first()
+            renting_info['source'] = source.strip() if source else ''
+            info = response.css('ul.introduce-item li:nth-child(2) span:nth-child(2)::text').extract_first()
+            renting_info['info'] = info.strip() if info else ''
+            # renting_info['cover'] = response.xpath('//img[@id="smainPic"]/@src').extract_first()
+            # renting_info['title'] = response.xpath('//div[@class="main-wrap"]/div[1]/h1/text()').extract_first()
+            # renting_info['price'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[1]/b/text()').extract_first()
+            # renting_info['payment'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/div/span[2]/text()').extract_first()
+            # renting_info['mode'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[1]/span[2]/text()').extract_first()
+            # renting_info['house'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[2]/span[2]/text()').extract_first()
+            # renting_info['phone'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[2]/div[1]/span/text()').extract_first()
+            # renting_info['address'] = response.xpath('//div[@class="main-wrap"]/div[2]/div[2]/div[1]/div[1]/ul/li[6]/span[2]/text()').extract_first()
+            # renting_info['info'] = response.xpath('//div[@class="main-wrap"]/div[3]/div[1]/div[2]/ul/li[2]/span[2]/text()').extract_first()
+            house_image = []
+            image_eles = response.css('#housePicList li')
+            if not image_eles:
+                for img in image_eles:
+                    _path = img.css('img::attr(lazy_src)').extract_first()
+                    if not _path:
+                        continue
+                    house_image.append(_path)
 
+            renting_info['images'] = house_image
         except Exception as e:
-            print(e)
+            print(traceback.print_exc(), e)
         yield renting_info
 
-    def make_font(self, script_text):
-        base64_text = re.findall("src:url\('.*charset=utf-8;base64,(.*)'\) format", script_text)[0]
-        if not base64_text:
-            return False
-        font = TTFont(BytesIO(base64.decodebytes(base64_text.encode())))
-
-        # 转换格式
-        self.crypt_font = font['cmap'].tables[0].ttFont.tables['cmap'].tables[0].cmap
-
-    def parse_crypt_text(self, string):
-        ret_list = []
-        for char in string:
-            decode_str = ord(char)
-            if decode_str in self.crypt_font:
-                crypt_str = self.crypt_font[decode_str]
-                real_str = str(int(crypt_str[-2:]) - 1)
-            else:
-                real_str = char
-            ret_list.append(real_str)
-        return ''.join(ret_list)

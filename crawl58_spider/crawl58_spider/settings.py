@@ -53,8 +53,8 @@ ROBOTSTXT_OBEY = False
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'crawl58_spider.middlewares.MyHttpProxy': 543,
-   'crawl58_spider.middlewares.MyUserAgent': 542,
+   # 'crawl58_spider.middlewares.MyHttpProxy': 543,
+   # 'crawl58_spider.middlewares.MyUserAgent': 542,
 }
 
 # Enable or disable extensions

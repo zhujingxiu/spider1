@@ -8,6 +8,7 @@ import json
 import base64
 import pymysql
 import datetime
+from crawl58_spider import settings
 from io import BytesIO
 from fontTools.ttLib import TTFont
 
@@ -16,8 +17,8 @@ class Crawl58SpiderPipeline(object):
 
     def __init__(self):
         self.crypt_list = []
-        self.conn = pymysql.connect(host='localhost', user='root', password='123456', database='pyspider',
-                                    charset='utf8')
+        self.conn = pymysql.connect(host=settings.DB_HOST, user=settings.DB_USER, password=settings.DB_PWD,
+                                    database=settings.DB_NAME, charset='utf8')
         self.cur = self.conn.cursor()
 
     def process_item(self, item, spider):

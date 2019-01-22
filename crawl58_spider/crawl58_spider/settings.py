@@ -99,5 +99,12 @@ SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 SCHEDULER_PERSIST = True
 
 
-REDIS_HOST = '127.0.0.1'#27.154.108.243
+REDIS_HOST = '192.168.102.200'#27.154.108.243
 REDIS_PORT = 6379
+
+
+DB_NAME = 'pyspider'
+DB_HOST = '192.168.102.200'
+DB_PORT = 3306
+DB_USER = 'pydbadmin'
+DB_PWD = '1q2w3e4r5t'

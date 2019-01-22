@@ -11,6 +11,7 @@ import datetime
 from io import BytesIO
 from fontTools.ttLib import TTFont
 from crawl58_spider import settings
+from crawl58_spider import utils
 
 
 class Crawl58SpiderPipeline(object):
@@ -59,6 +60,7 @@ class Crawl58SpiderPipeline(object):
                 'source': source,
                 'info': info,
                 'images': json.dumps(images),
+                'localhost': utils.get_host_ip(),
                 'proxy': proxy,
                 'addtime': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }

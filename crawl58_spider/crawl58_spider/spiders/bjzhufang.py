@@ -10,7 +10,6 @@ from crawl58_spider.items import Crawl58SpiderItem
 
 class BjzhufangSpider(RedisCrawlSpider):
     name = 'bjzhufang'
-    crypt_font = []
     # allowed_domains = ['bj.58.com/chuzu/']
     # start_urls = ['https://bj.58.com/chuzu/']
     redis_key = 'bjzhufang:start_urls'

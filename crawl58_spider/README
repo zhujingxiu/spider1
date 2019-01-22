@@ -1,4 +1,4 @@
-### python3环境
+### python3爬虫虚拟环境 windows如下，linux见预览图
 ```
 Microsoft Windows [版本 10.0.17134.556]
 (c) 2018 Microsoft Corporation。保留所有权利。
@@ -27,7 +27,6 @@ pyasn1           0.4.4
 pyasn1-modules   0.2.2
 pycparser        2.19
 PyDispatcher     2.0.5
-PyExecJS         1.5.1
 PyHamcrest       1.9.0
 PyMySQL          0.9.3
 pyOpenSSL        18.0.0
@@ -47,13 +46,18 @@ w3lib            1.19.0
 wheel            0.32.2
 zope.interface   4.6.0
 ```
+### 部署
+- 1.主机器 `192.168.102.200`
+    - 数据库mysql
+    - redis
+- 2.从属机器两台 `192.168.102.111`和 `192.168.102.222`
 ### 数据库
 ```
 -- 创建数据库
 CREATE DATABASE IF NOT EXISTS pyspider default charset utf8 COLLATE utf8_general_ci;
 -- 创建数据表
 CREATE TABLE `renting58` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `cover` varchar(256) DEFAULT NULL COMMENT '封面图',
   `title` varchar(128) NOT NULL,
   `price` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT '房租价格',
@@ -67,7 +71,8 @@ CREATE TABLE `renting58` (
   `info` text COMMENT '简介',
   `images` text COMMENT '图片',
   `proxy` varchar(32) DEFAULT NULL COMMENT '代理',
-  `addtime` datetime DEFAULT NULL
+  `addtime` datetime DEFAULT NULL,
+  PRIMARY KEY ( `id` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- 授权远程用户
 GRANT ALL PRIVILEGES ON *.* TO 'pydbadmin' @'%' IDENTIFIED BY '1q2w3e4r5t' WITH GRANT OPTION;

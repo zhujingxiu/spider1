@@ -12,10 +12,13 @@ from scrapy.contrib.downloadermiddleware.useragent import UserAgentMiddleware
 PROXIES = [
     ('http', '119.180.177.118:8060'),
     ('http', '61.48.62.65:8060'),
-    ('https', '47.99.49.246:3128'),
-    ('https', '183.88.194.30:8080'),
-    ('https', '103.6.104.104:38898'),
-    ('http', '80.28.7.3:50866'),
+    ('http', '180.118.73.147:9000'),
+    ('http', '121.61.3.43:9999'),
+    ('http', '115.218.223.202:9000'),
+    ('http', '112.98.126.100:33421'),
+    ('http', '124.42.68.152:90'),
+    ('http', '111.177.166.13:9999'),
+    ('http', '119.167.153.50:8118'),
 ]
 
 USER_AGENT = ["Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 "

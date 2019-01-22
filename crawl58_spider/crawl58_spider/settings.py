@@ -67,6 +67,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'crawl58_spider.pipelines.Crawl58SpiderPipeline': 300,
+   'scrapy_redis.pipelines.RedisPipeline': 200
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -89,3 +90,14 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# 使用scray-redis组件去重
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+# 使用scrapy-redis组件调度器
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+# 是否允许暂停
+SCHEDULER_PERSIST = True
+
+
+REDIS_HOST = '127.0.0.1'#27.154.108.243
+REDIS_PORT = 6379

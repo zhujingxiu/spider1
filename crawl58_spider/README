@@ -1,3 +1,5 @@
+### python3环境
+```
 Microsoft Windows [版本 10.0.17134.556]
 (c) 2018 Microsoft Corporation。保留所有权利。
 
@@ -44,3 +46,29 @@ urllib3          1.24
 w3lib            1.19.0
 wheel            0.32.2
 zope.interface   4.6.0
+```
+### 数据库
+```
+-- 创建数据库
+CREATE DATABASE IF NOT EXISTS pyspider default charset utf8 COLLATE utf8_general_ci;
+-- 创建数据表
+CREATE TABLE `renting58` (
+  `id` int(11) NOT NULL,
+  `cover` varchar(256) DEFAULT NULL COMMENT '封面图',
+  `title` varchar(128) NOT NULL,
+  `price` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT '房租价格',
+  `payment` varchar(32) DEFAULT NULL COMMENT '支付方式',
+  `mode` varchar(128) NOT NULL COMMENT '租赁方式',
+  `house` varchar(128) DEFAULT NULL COMMENT '户型',
+  `position` varchar(64) NOT NULL COMMENT '朝向楼层',
+  `address` varchar(256) NOT NULL COMMENT '详细地址',
+  `source` varchar(128) NOT NULL COMMENT '信息来源',
+  `phone` varchar(32) DEFAULT NULL COMMENT '联系电话',
+  `info` text COMMENT '简介',
+  `images` text COMMENT '图片',
+  `proxy` varchar(32) DEFAULT NULL COMMENT '代理',
+  `addtime` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- 授权远程用户
+GRANT ALL PRIVILEGES ON *.* TO 'pydbadmin' @'%' IDENTIFIED BY '1q2w3e4r5t' WITH GRANT OPTION;
+```

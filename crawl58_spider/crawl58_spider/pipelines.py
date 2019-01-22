@@ -8,9 +8,9 @@ import json
 import base64
 import pymysql
 import datetime
-from crawl58_spider import settings
 from io import BytesIO
 from fontTools.ttLib import TTFont
+from crawl58_spider import settings
 
 
 class Crawl58SpiderPipeline(object):

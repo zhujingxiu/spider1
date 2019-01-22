@@ -1,3 +1,15 @@
+Microsoft Windows [版本 10.0.17134.556]
+(c) 2018 Microsoft Corporation。保留所有权利。
+
+(py3spider) E:\python\spider1>pip list
+Package          Version
+---------------- ----------
+asn1crypto       0.24.0
+attrs            18.2.0
+Automat          0.7.0
+beautifulsoup4   4.6.3
+certifi          2018.10.15
+cffi             1.11.5
 chardet          3.0.4
 constantly       15.1.0
 cryptography     2.3.1

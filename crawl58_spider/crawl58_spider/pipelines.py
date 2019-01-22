@@ -74,11 +74,22 @@ class Crawl58SpiderPipeline(object):
         return item
 
     def make_font(self, base64_text):
+        '''
+        获取页面数字加密后的字体映射
+        :param base64_text:
+        :return:
+        '''
         font = TTFont(BytesIO(base64.decodebytes(base64_text.encode())))
         # 转换格式
         self.crypt_list = font['cmap'].tables[0].ttFont.tables['cmap'].tables[0].cmap
 
     def parse_crypt_text(self, string, debug=False):
+        '''
+        页面数字解码
+        :param string:
+        :param debug:
+        :return:
+        '''
         ret_list = []
         for char in string:
             decode_str = ord(char)

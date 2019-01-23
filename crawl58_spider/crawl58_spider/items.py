@@ -28,24 +28,26 @@ def json_images(value):
     return json.dumps(value)
 
 
-class Crawl58SpiderItem(scrapy.Item):
+class Crawl58SpiderItem1(scrapy.Item):
     # define the fields for your item here like:
 
-    # title = scrapy.Field()
-    # cover = scrapy.Field()
-    # mode = scrapy.Field()
-    # house = scrapy.Field()
-    # crypt = scrapy.Field()
-    # price = scrapy.Field()
-    # payment = scrapy.Field()
-    # info = scrapy.Field()
-    # phone = scrapy.Field()
-    # address = scrapy.Field()
-    # position = scrapy.Field()
-    # source = scrapy.Field()
-    # images = scrapy.Field()
-    # proxy = scrapy.Field()
+    title = scrapy.Field()
+    cover = scrapy.Field()
+    mode = scrapy.Field()
+    house = scrapy.Field()
+    crypt = scrapy.Field()
+    price = scrapy.Field()
+    payment = scrapy.Field()
+    info = scrapy.Field()
+    phone = scrapy.Field()
+    address = scrapy.Field()
+    position = scrapy.Field()
+    source = scrapy.Field()
+    images = scrapy.Field()
+    proxy = scrapy.Field()
 
+
+class Crawl58SpiderItem(scrapy.Item):
     title = scrapy.Field()
     cover = scrapy.Field()
     mode = scrapy.Field()
@@ -58,5 +60,5 @@ class Crawl58SpiderItem(scrapy.Item):
     address = scrapy.Field()
     position = scrapy.Field()
     source = scrapy.Field()
-    images = scrapy.Field(input_processor=MapCompose(json_images))
+    images = scrapy.Field(input_processor=MapCompose(json_images), output_processor=MapCompose(return_value))
     proxy = scrapy.Field()

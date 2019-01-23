@@ -8,14 +8,13 @@ from scrapy_redis.spiders import RedisCrawlSpider
 from crawl58_spider.items import Crawl58SpiderItem, MyItemLoader
 
 
-
-class BjzhufangSpider(RedisCrawlSpider):
+class BjzhufangSpider(CrawlSpider):
     name = 'bjzhufang'
-    # allowed_domains = ['bj.58.com/chuzu/']
-    # start_urls = ['https://bj.58.com/chuzu/']
-    redis_key = 'bjzhufang:start_urls'
+    # allowed_domains = ['bj.58.com/chuzu']
+    start_urls = ['https://bj.58.com/chuzu/']
+    # redis_key = 'bjzhufang:start_urls'
     # 链接提取器
-    link = LinkExtractor(allow=r'pn(\d+)?/?')
+    link = LinkExtractor(allow=r'(pn(\d+)?/)?')
     rules = (
         # 规则解析器
         # callback： 指定解析回调
@@ -28,6 +27,7 @@ class BjzhufangSpider(RedisCrawlSpider):
         print(response.url, len(li_list))
         for i, li_item in enumerate(li_list, 1):
             detail_url = li_item.xpath('./div[@class="des"]/h2/a/@href').extract_first().strip()
+            print('detail_url:>>', detail_url)
             if detail_url:
                 yield scrapy.Request(url='https:'+detail_url, callback=self.parse_detail)
 
